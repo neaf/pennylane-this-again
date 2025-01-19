@@ -1,0 +1,29 @@
+<div>
+  <blockquote>
+    Honey, what do you want for breakfast?
+    <footer>
+    <cite>— You</cite>
+  </footer>
+  </blockquote>
+  <blockquote>
+    You're a wizard, I'll enjoy whatever you can make me!
+    <footer>
+    <cite>— Your partner</cite>
+  </footer>
+  </blockquote>
+  <hr>
+  <p>Ohhh, we know that pain! Tell us what's in your fridge and drop the burden of those silly decisions.</p>
+</div>
+
+
+<div>
+  <textarea
+    name="ingredients"
+    hx-get="/recipes/search/results"
+    hx-trigger="keyup changed delay:500ms"
+    hx-target="#results"
+    placeholder="bread, tortillas, goat cheese, honey, peanuts, rocket"
+    oninput="if (this.clientHeight < this.scrollHeight) { this.style.height = this.scrollHeight + 'px'; }"
+    ></textarea>
+  <div id="results"></div>
+</div>

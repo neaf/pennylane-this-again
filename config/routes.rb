@@ -6,7 +6,8 @@ Rails.application.routes.draw do
   get "up" => "rails/health#show", as: :rails_health_check
 
   namespace :recipes do
-    resources :searches, only: [:create]
+    get "search", controller: "searches", action: :new
+    get "search/results", controller: "searches", action: :results
   end
 
   # Render dynamic PWA files from app/views/pwa/* (remember to link manifest in application.html.erb)
