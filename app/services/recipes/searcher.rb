@@ -13,30 +13,45 @@ module Recipes
         end
 
         search_ingredients = ActiveRecord::Base.send(:sanitize_sql_array, ["ARRAY[?]::text[]", ingredients])
+        ActiveRecord::Base.connection.execute("SET pg_trgm.similarity_threshold = 0.2")
 
-        Recipe
-          .joins(
-            "JOIN LATERAL unnest(recipes.ingredients::text[]) AS db_ingredients(ingredient) ON true"
-          ) # multiply records by recipe ingredients
+        # Multiply recipes by their ingredents and search ingredients
+        #
+        matching_recipes = Recipe
+          .joins(:ingredients)
           .joins(
             "JOIN LATERAL unnest(%s) AS search(ingredient) ON true" % search_ingredients
-          ) # multiply records by search ingredients
+          )
           .select("recipes.*")
+          .select("search.ingredient AS search_ingredient")
+          .where("recipe_ingredients.ingredient % search.ingredient")
+          .group("recipes.id", "search_ingredient")
+
+        recipes_with_matching_ingredients = Recipe.from(matching_recipes, :recipes)
+          .joins(:ingredients)
+          .select("recipes.id, recipes.title")
           .select(
-            "COUNT(DISTINCT search.ingredient) FILTER (WHERE similarity(db_ingredients.ingredient, search.ingredient) > 0.2) AS matching_ingredients_count"
-          ) # count matching ingredients to promote utilizing most of the stock, DISTINCT prevents promoting repeated ingredients
+            "ARRAY_AGG(DISTINCT recipe_ingredients.ingredient) FILTER (WHERE recipe_ingredients.ingredient % recipes.search_ingredient) AS matching_ingredients"
+          )
+          .group("recipes.id", "recipes.title")
+
+        recipes_with_counts = Recipe.from(recipes_with_matching_ingredients, :recipes)
+          .joins(:ingredients)
+          .select("recipes.id, recipes.title, matching_ingredients")
+          .select("CARDINALITY(matching_ingredients) AS matching_ingredients_count")
           .select(
-            "COUNT(DISTINCT db_ingredients.ingredient) - COUNT(DISTINCT search.ingredient) FILTER (WHERE similarity(db_ingredients.ingredient, search.ingredient) > 0.2) AS non_matching_ingredients_count"
-          ) # count non-matching ingredients to demote recipes requiring things missing from the stock
-          .select(
-            "ARRAY_AGG(DISTINCT db_ingredients.ingredient) FILTER (WHERE similarity(db_ingredients.ingredient, search.ingredient) > 0.2) AS matching_ingredients"
-          ) # gather matching ingredients from records grouped by recipe, used for highlighting in UI
-          .group("recipes.id") # collapse multipied records
-          .having(
-            "COUNT(DISTINCT search.ingredient) FILTER (WHERE similarity(db_ingredients.ingredient, search.ingredient) > 0.2) > 0"
-          ) # select recipes with at least one matching ingredient
+            "COUNT(DISTINCT recipe_ingredients.ingredient) FILTER (WHERE recipe_ingredients.ingredient NOT IN (SELECT unnest(matching_ingredients))) AS non_matching_ingredients_count"
+          )
+          .group("recipes.id", "recipes.title", "matching_ingredients")
+
+        Recipe.from(recipes_with_counts, :recipes)
+          .includes(:ingredients)
+          .select("recipes.id", "recipes.title")
+          .select("matching_ingredients")
+          .select("matching_ingredients_count")
+          .select("non_matching_ingredients_count")
           .order(
-            "matching_ingredients_count DESC, non_matching_ingredients_count ASC, recipes.id"
+            "matching_ingredients_count DESC, non_matching_ingredients_count ASC"
           )
           .limit(10)
       end

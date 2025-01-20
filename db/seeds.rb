@@ -9,12 +9,17 @@ recipes.each.with_index do |recipe, index|
 
   Recipe.create!(
     title: recipe["title"],
-    ingredients: recipe["ingredients"],
     cook_time_minutes: recipe["cook_time"],
     prep_time_minutes: recipe["prep_time"],
     rating: recipe["rating"],
     author_name: recipe["author"],
     image_url: recipe["image"],
     category: category,
-  )
+  ).tap do |r|
+    recipe["ingredients"].each do |ingredient|
+      r.ingredients.create!(
+        ingredient: ingredient,
+      )
+    end
+  end
 end

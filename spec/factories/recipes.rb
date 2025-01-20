@@ -4,15 +4,6 @@ FactoryBot.define do
       Faker::Food.dish
     end
 
-    ingredients do
-      rand(0...10).times.map do
-        [
-          Faker::Food.measurement,
-          Faker::Food.ingredient,
-        ].join(" ")
-      end
-    end
-
     prep_time_minutes do
       rand(5...60)
     end
@@ -34,5 +25,15 @@ FactoryBot.define do
     end
 
     association(:category, factory: :recipe_category)
+
+    transient do
+      ingredients { [] }
+    end
+
+    after(:create) do |recipe, evaluator|
+      evaluator.ingredients.each do |ingredient|
+        create(:recipe_ingredient, recipe: recipe, ingredient: ingredient)
+      end
+    end
   end
 end

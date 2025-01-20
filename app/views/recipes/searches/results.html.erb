@@ -7,10 +7,10 @@
           <ul>
               <% recipe.ingredients.each do |ingredient| %>
               <li>
-                  <% if recipe.matching_ingredients.include?(ingredient) %>
-                    <mark><%= ingredient %></mark>
+                  <% if recipe.matching_ingredients.include?(ingredient.ingredient) %>
+                    <mark><%= ingredient.ingredient %></mark>
                   <% else %>
-                    <%= ingredient %>
+                    <%= ingredient.ingredient %>
                   <% end %>
               </li>
               <% end %>

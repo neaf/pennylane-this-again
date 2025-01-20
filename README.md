@@ -18,9 +18,9 @@ Deploy version can be found here:
 
 [https://this-again.fly.dev/](https://this-again.fly.dev/)
 
-However, only after deploying I had a chance to conclude the performance on fly.io is absymial. The DB takes long time to respond despite it's CPU and memory being utilized only up to 20%.
+However, only after deploying I had a chance to conclude the performance on fly.io is not great. The DB takes long time to respond despite it's CPU and memory being utilized only up to 20%.
 
-On development machine it takes 0.5-2s for reasonable amount of ingredients. Not ideal, but snappy enough.
+On development machine it takes around 500-600ms for ten search ingredients. Not ideal, but snappy enough.
 
 For most enjoyable experience let's setup it locally:
 
@@ -43,8 +43,4 @@ $ open "http://localhost:3000"
 
 # Comment
 
-Regardless of how the database is run, the performance issue is unfortunate but discovered too late to react within the scope of the recruitment task. It works great as a proof of concept and the app is fun enough to deserve a second iteration.
-
-My next steps would be:
-1. Instead of using `JOIN LATERAL` to expand single recipe to multiple records for each ingredient, I'd create prepopulated table that stores (recipe_id, ingredient) tuples. Aside from avoiding using `unnest` on the fly, it would also allow me to create GiST index optimized for trigram similarity search.
-2. If that's not enough, move to elasticsearch, keeping similar behaviour of the actual query.
+Regardless of how the database is run, the performance issue is unfortunate but discovered too late to react within the scope of the recruitment task. It works great as a proof of concept and the app is fun enough to deserve a second iteration. I'd explore using elasticsearch with similar logic as it would probably handle the search ingredients array better.
