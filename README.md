@@ -38,7 +38,7 @@ $ rake db:create db:migrate db:seed
 $ bundle exec rspec
 
 $ rails s
-$ open "http://localhost:3000"
+$ open "http://localhost:8080"
 ```
 
 # Comment

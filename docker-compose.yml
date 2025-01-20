@@ -15,7 +15,7 @@ services:
     env_file:
       - .env
     ports:
-      - 7000:3000
+      - 7000:8080
     volumes:
       - .:/rails
       - this-again-gems:/bundle
