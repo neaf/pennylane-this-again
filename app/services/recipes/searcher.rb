@@ -31,18 +31,20 @@ module Recipes
           .joins(:ingredients)
           .select("recipes.id, recipes.title")
           .select(
+            "COUNT(DISTINCT search_ingredient) FILTER (WHERE recipe_ingredients.ingredient % search_ingredient) AS matching_ingredients_count"
+          )
+          .select(
             "ARRAY_AGG(DISTINCT recipe_ingredients.ingredient) FILTER (WHERE recipe_ingredients.ingredient % recipes.search_ingredient) AS matching_ingredients"
           )
           .group("recipes.id", "recipes.title")
 
         recipes_with_counts = Recipe.from(recipes_with_matching_ingredients, :recipes)
           .joins(:ingredients)
-          .select("recipes.id, recipes.title, matching_ingredients")
-          .select("CARDINALITY(matching_ingredients) AS matching_ingredients_count")
+          .select("recipes.id, recipes.title, matching_ingredients_count, matching_ingredients")
           .select(
-            "COUNT(DISTINCT recipe_ingredients.ingredient) FILTER (WHERE recipe_ingredients.ingredient NOT IN (SELECT unnest(matching_ingredients))) AS non_matching_ingredients_count"
+            "COUNT(recipe_ingredients.ingredient) FILTER (WHERE recipe_ingredients.ingredient <> ANY (matching_ingredients)) AS non_matching_ingredients_count"
           )
-          .group("recipes.id", "recipes.title", "matching_ingredients")
+          .group("recipes.id", "recipes.title", "matching_ingredients_count", "matching_ingredients")
 
         Recipe.from(recipes_with_counts, :recipes)
           .includes(:ingredients)

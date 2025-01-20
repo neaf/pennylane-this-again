@@ -41,6 +41,9 @@ RSpec.describe Recipes::Searcher do
         "5 cloves garlic",
         "1 teaspoon coarse salt",
         "1 teaspoon dried oregano",
+        "1 cup of crunched oregano",
+        "1 bunch of fresh oregano",
+        "3 oregano leaves",
         "1 teaspoon hot pepper flakes",
         "1 teaspoon freshly ground black pepper",
         "½ cup extra-virgin olive oil",
@@ -101,6 +104,8 @@ RSpec.describe Recipes::Searcher do
           "vinegar",
           "garlic",
           "spinach",
+          "onions",
+          "oregano",
           "beef",
           "carrots",
         ]
@@ -108,7 +113,7 @@ RSpec.describe Recipes::Searcher do
 
       it "orders by amount of matching ingredients" do
         expect(searcher.recipes).to eq(recipes.values_at(
-          4, 1, 2
+          2, 4, 1
         ))
       end
     end
@@ -121,9 +126,25 @@ RSpec.describe Recipes::Searcher do
         ]
       end
 
-      it "orders by amount of matching ingredients" do
+      it "orders descendingly by amount of matching ingredients" do
         expect(searcher.recipes).to eq(recipes.values_at(
           4, 1, 2
+        ))
+      end
+    end
+
+    describe "prevents promoting repeated matches" do
+      let(:search_ingredients) do
+        [
+          "oregano",
+          "mayonnaise",
+          "mustard",
+        ]
+      end
+
+      it "does not put recipes with repeated matches above others" do
+        expect(searcher.recipes).to eq(recipes.values_at(
+          1, 2
         ))
       end
     end
