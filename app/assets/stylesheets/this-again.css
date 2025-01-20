@@ -1,0 +1,21 @@
+h2 {
+  --pico-font-family: Pacifico, cursive;
+  --pico-font-weight: 400;
+  --pico-typography-spacing-vertical: 0.5rem;
+}
+
+.indicator-container {
+  position: relative;
+  font-size: 0.75rem;
+}
+
+.indicator-container span {
+  opacity: 0;
+  position: absolute;
+  top: -3rem;
+  right: 1rem;
+}
+
+#empty-state {
+  text-align: center;
+}

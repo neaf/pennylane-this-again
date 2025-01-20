@@ -9,23 +9,7 @@ RSpec.describe Recipes::SearchesController, type: :controller do
     end
   end
 
-  describe "#create" do
-    context "with invalid params" do
-      let(:params) do
-        {
-          missing: "ingredients",
-        }
-      end
-
-      it "rendres new template" do
-        post :create, params: params
-
-        expect(assigns(:search_sanitizer)).to be_an_instance_of(Recipes::SearchesController::SearchSanitizer)
-        expect(assigns(:search_sanitizer).valid?).to eq(false)
-        expect(response).to render_template("recipes/searches/new")
-      end
-    end
-
+  describe "#results" do
     context "with valid params" do
       let(:params) do
         {
@@ -35,8 +19,9 @@ RSpec.describe Recipes::SearchesController, type: :controller do
 
       let(:ingredients) do
         <<~TEXT
-        milk, butter, frozen blueberries
-        strawberries
+        milk, butter,   frozen blueberries
+
+           strawberries
         TEXT
       end
 
@@ -56,7 +41,7 @@ RSpec.describe Recipes::SearchesController, type: :controller do
         ]
       end
 
-      it "responds with recipes found with Recipes::Searcher" do
+      it "responds with recipes found using Recipes::Searcher" do
         expect_method_object_call(
           object: Recipes::Searcher,
           init_arguments: {
@@ -66,10 +51,10 @@ RSpec.describe Recipes::SearchesController, type: :controller do
           return_value: found_recipes,
         )
 
-        post :create, params: params
+        get :results, params: params
 
         expect(assigns(:recipes)).to eq(found_recipes)
-        expect(response).to render_template("recipes/searches/create")
+        expect(response).to render_template("recipes/searches/results")
       end
     end
   end

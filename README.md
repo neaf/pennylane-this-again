@@ -1,24 +1,50 @@
 # README
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+Hello Pennylane people!
 
-Things you may want to cover:
+My first thought after reading the task description was the following:
 
-* Ruby version
+The tool is so not critical that no one is going to endure any amount of friction. People want to sloppily type or dictate stuff and expect us to make it work. Hence I, opted for super simple input interface, even if that means sacrificing results "accuracy".
 
-* System dependencies
+Using trigram similarity might match "olives" with "olive oil" or miss "rice" in "1 (8.5 ounce) package UNCLE BEN'S® Jasmine READY RICE®". However, assuming no recipe is going to exactly match the user's stock and people will mostly use the app for inspiration, I tried to select a treshold that strucks the right balance between input forgiveness and correctness of results.
 
-* Configuration
+It was a fun little challenge, even more so because I received it right after I promised my girlfriend to prepare a weekly meal plan, so we can avoid decision fatigue every other day. :)
 
-* Database creation
+I hope you enjoying playing with the solution.
 
-* Database initialization
+# Running
 
-* How to run the test suite
+Deploy version can be found here:
 
-* Services (job queues, cache servers, search engines, etc.)
+[https://this-again.fly.dev/](https://this-again.fly.dev/)
 
-* Deployment instructions
+However, only after deploying I had a chance to conclude the performance on fly.io is absymial. The DB takes long time to respond despite it's CPU and memory being utilized only up to 20%.
 
-* ...
+On development machine it takes 0.5-2s for reasonable amount of ingredients. Not ideal, but snappy enough.
+
+For most enjoyable experience let's setup it locally:
+
+``` sh
+$ git clone git@github.com:neaf/pennylane-this-again.git
+$ cd pennylane-this-again
+
+$ cp config/database.yml.example config/database.yml
+$ vim config/database.yml
+
+$ bundle install
+
+$ rake db:create db:migrate db:seed
+
+$ bundle exec rspec
+
+$ rails s
+$ open "http://localhost:3000"
+```
+
+# Comment
+
+Regardless of how the database is run, the performance issue is unfortunate but discovered too late to react within the scope of the recruitment task. It works great as a proof of concept and the app is fun enough to deserve a second iteration.
+
+My next steps would be:
+1. Instead of using `JOIN LATERAL` to expand single recipe to multiple records for each ingredient, I'd create prepopulated table that stores (recipe_id, ingredient) tuples. Aside from avoiding using `unnest` on the fly, it would also allow me to create GiST index optimized for trigram similarity search.
+2. If that's not enough, move to elasticsearch, keeping similar behaviour of the actual query.

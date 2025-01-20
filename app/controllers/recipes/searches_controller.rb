@@ -34,7 +34,7 @@ module Recipes
           return []
         end
 
-        ingredients.split(/[\n,]/).map(&:strip)
+        ingredients.split(/[\n,]/).map(&:strip).reject(&:blank?)
       end
     end
   end
