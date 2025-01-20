@@ -1,18 +1,24 @@
-<ul>
-  <% @recipes.each do |recipe| %>
-    <li>
-      <h3><%= recipe.title %></h3>
-      <ul>
-        <% recipe.ingredients.each do |ingredient| %>
+<% if @search_sanitizer.ingredients_list.present? %>
+  <% if @recipes.present? %>
+    <ul>
+      <% @recipes.each do |recipe| %>
           <li>
-            <% if recipe.matching_ingredients.include?(ingredient) %>
-              <mark><%= ingredient %></mark>
-            <% else %>
-              <%= ingredient %>
-            <% end %>
-          </li>
-        <% end %>
-      </ul>
-    </li>
+          <h3><%= recipe.title %></h3>
+          <ul>
+              <% recipe.ingredients.each do |ingredient| %>
+              <li>
+                  <% if recipe.matching_ingredients.include?(ingredient) %>
+                    <mark><%= ingredient %></mark>
+                  <% else %>
+                    <%= ingredient %>
+                  <% end %>
+              </li>
+              <% end %>
+          </ul>
+        </li>
+      <% end %>
+    </ul>
+  <% else %>
+    <p id="empty-state"><small>You're cooked, it's probably time to hit a grocery store. 😔</small></p>
   <% end %>
-</ul>
+<% end %>

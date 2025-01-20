@@ -1,0 +1,27 @@
+services:
+  db:
+    image: postgres:17.2
+    volumes:
+      - this-again-db:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: development
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: rails s -b 0.0.0.0
+    ports:
+      - 7010:3000
+    volumes:
+      - .:/usr/src/app
+      - this-again-gems:/bundle
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgres://postgres:password@db:5432/development
+
+volumes:
+  this-again-db:
+  this-again-gems:
