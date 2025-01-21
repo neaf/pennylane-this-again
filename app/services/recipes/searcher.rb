@@ -22,7 +22,7 @@ module Recipes
         ActiveRecord::Base.connection.execute("SET pg_trgm.similarity_threshold = 0.2")
 
         # Multiply recipes by their ingredents and search ingredients
-        #
+        # Filter recipes with at least one match
         matching_recipes = Recipe
           .joins(:ingredients)
           .joins(
@@ -33,18 +33,21 @@ module Recipes
           .where("recipe_ingredients.ingredient % search.ingredient")
           .group("recipes.id", "search_ingredient")
 
+        # Gather matching recipe ingredients for highlighting in UI
+        # Count used search ingredients for sorting purposes
         recipes_with_matching_ingredients = Recipe.from(matching_recipes, :recipes)
           .joins(:ingredients)
           .select("recipes.id, recipes.title")
           .select(
-            "COUNT(DISTINCT search_ingredient) FILTER (WHERE recipe_ingredients.ingredient % search_ingredient) AS matching_ingredients_count"
+            "ARRAY_AGG(DISTINCT recipe_ingredients.ingredient) FILTER (WHERE recipe_ingredients.ingredient % recipes.search_ingredient) AS matching_ingredients"
           )
           .select(
-            "ARRAY_AGG(DISTINCT recipe_ingredients.ingredient) FILTER (WHERE recipe_ingredients.ingredient % recipes.search_ingredient) AS matching_ingredients"
+            "COUNT(DISTINCT search_ingredient) FILTER (WHERE recipe_ingredients.ingredient % search_ingredient) AS matching_ingredients_count"
           )
           .group("recipes.id", "recipes.title")
 
-        recipes_with_counts = Recipe.from(recipes_with_matching_ingredients, :recipes)
+        # Count non-matching ingredients for sorting purposes
+        recipes_with_non_matching_ingredients = Recipe.from(recipes_with_matching_ingredients, :recipes)
           .joins(:ingredients)
           .select("recipes.id, recipes.title, matching_ingredients_count, matching_ingredients")
           .select(
@@ -52,7 +55,7 @@ module Recipes
           )
           .group("recipes.id", "recipes.title", "matching_ingredients_count", "matching_ingredients")
 
-        Recipe.from(recipes_with_counts, :recipes)
+        Recipe.from(recipes_with_non_matching_ingredients, :recipes)
           .includes(:ingredients)
           .select("recipes.id", "recipes.title")
           .select("matching_ingredients")
