@@ -10,17 +10,23 @@ Using trigram similarity might match "olives" with "olive oil" or miss "rice" in
 
 It was a fun little challenge, even more so because I received it right after I promised my girlfriend to prepare a weekly meal plan, so we can avoid decision fatigue every other day. :)
 
-I hope you enjoying playing with the solution.
+I hope you enjoy playing with the solution.
+
+# Functionality
+
+The app accepts a list of grocery ingredients and searches for recipes that best utilizes those.
+
+By default, it'll provide recipes that use the most ingredients present in user's stock. This is useful in case avoiding things to expire is a decision factor. It also promotes more complex recipes, which hopefully translates to bigger meal enjoyment.
+
+By selecting "That's all I have", the user is presented with recipes that more closely match their stock. The recipes tend to be simpler but should require fewer ingredient substitutions or new purchases.
 
 # Running
 
-Deploy version can be found here:
+Deployed instance can be found here:
 
 [https://this-again.fly.dev/](https://this-again.fly.dev/)
 
-However, only after deploying I had a chance to conclude the performance on fly.io is not great. The DB takes long time to respond despite it's CPU and memory being utilized only up to 20%.
-
-On development machine it takes around 500-600ms for ten search ingredients. Not ideal, but snappy enough.
+However, only after deploying I had a chance to discover the small DB intsance on fly.io is not to be fully trusted with such query.
 
 For most enjoyable experience let's setup it locally:
 
@@ -41,6 +47,8 @@ $ rails s
 $ open "http://localhost:8080"
 ```
 
-# Comment
+# Comments
 
-Regardless of how the database is run, the performance issue is unfortunate but discovered too late to react within the scope of the recruitment task. It works great as a proof of concept and the app is fun enough to deserve a second iteration. I'd explore using elasticsearch with similar logic as it would probably handle the search ingredients array better.
+1. Normally I avoid such database query complexity. It can be almost impossible to understand without one-to-one explanation, hard to modify and couple the app to specific database engine. However, as long as it doesn't produce side effects (like creating normalized views or triggers) and is localized to one spot, I think it's worth doing that over complicating the stack with additional technologies.
+
+2. Regardless of how the database is run, it is a limiting factor for number of search ingredients or query comlexity when working with raw data. It works well enough for a proof of concept, however I'd explore using elasticsearch with similar logic in a next iteration.
