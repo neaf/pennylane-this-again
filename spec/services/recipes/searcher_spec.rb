@@ -207,5 +207,17 @@ RSpec.describe Recipes::Searcher do
         ))
       end
     end
+
+    describe "ingredient count validation" do
+      let(:search_ingredients) do
+        16.times.map { |n| "ingredient %s" % n }
+      end
+
+      it "raises exception" do
+        expect {
+          searcher.recipes
+        }.to raise_error(Recipes::Searcher::TooManyIngredientsError)
+      end
+    end
   end
 end

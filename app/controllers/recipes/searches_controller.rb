@@ -17,6 +17,8 @@ module Recipes
       @recipes = searcher.recipes
 
       render "recipes/searches/results"
+    rescue Recipes::Searcher::TooManyIngredientsError => e
+      render "recipes/searches/ingredient_limit_exceeded"
     end
 
     def search_params

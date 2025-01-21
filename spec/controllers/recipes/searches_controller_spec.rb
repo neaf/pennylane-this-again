@@ -11,7 +11,6 @@ RSpec.describe Recipes::SearchesController, type: :controller do
 
   describe "#results" do
     context "with valid params" do
-
       let(:ingredients) do
         <<~TEXT
         milk, butter,   frozen blueberries
@@ -84,6 +83,30 @@ RSpec.describe Recipes::SearchesController, type: :controller do
 
           expect(assigns(:recipes)).to eq(found_recipes)
           expect(response).to render_template("recipes/searches/results")
+        end
+      end
+
+      context "with too many ingredients" do
+        let(:params) do
+          {
+            ingredients: ingredients,
+          }
+        end
+
+        it "responds with an error" do
+          raise_error_on_method_object_call(
+            object: Recipes::Searcher,
+            init_arguments: {
+              ingredients: ingredients_list,
+              use_ratio: false,
+            },
+            method: :recipes,
+            error: Recipes::Searcher::TooManyIngredientsError,
+          )
+
+          get :results, params: params
+
+          expect(response).to render_template("recipes/searches/ingredient_limit_exceeded")
         end
       end
     end

@@ -1,5 +1,8 @@
 module Recipes
   class Searcher
+    INGREDIENT_COUNT_LIMIT = 15
+    class TooManyIngredientsError < StandardError; end
+
     attr_reader :ingredients, :use_ratio
 
     def initialize(ingredients:, use_ratio:)
@@ -9,6 +12,8 @@ module Recipes
 
     def recipes
       @recipes ||= begin
+        validate_ingredient_count!
+
         if ingredients.empty?
           return Recipe.none
         end
@@ -67,6 +72,14 @@ module Recipes
       end
 
       "matching_ingredients_count DESC, non_matching_ingredients_count ASC"
+    end
+
+    private
+
+    def validate_ingredient_count!
+      if ingredients.count > INGREDIENT_COUNT_LIMIT
+        raise TooManyIngredientsError
+      end
     end
   end
 end
