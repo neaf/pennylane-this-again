@@ -1,9 +1,10 @@
 module Recipes
   class Searcher
-    attr_reader :ingredients
+    attr_reader :ingredients, :use_ratio
 
-    def initialize(ingredients:)
+    def initialize(ingredients:, use_ratio:)
       @ingredients = ingredients
+      @use_ratio = use_ratio
     end
 
     def recipes
@@ -42,7 +43,7 @@ module Recipes
           .joins(:ingredients)
           .select("recipes.id, recipes.title, matching_ingredients_count, matching_ingredients")
           .select(
-            "COUNT(recipe_ingredients.ingredient) FILTER (WHERE recipe_ingredients.ingredient <> ANY (matching_ingredients)) AS non_matching_ingredients_count"
+            "COUNT(DISTINCT recipe_ingredients.ingredient) FILTER (WHERE recipe_ingredients.ingredient NOT IN (SELECT unnest(matching_ingredients))) AS non_matching_ingredients_count"
           )
           .group("recipes.id", "recipes.title", "matching_ingredients_count", "matching_ingredients")
 
@@ -52,11 +53,20 @@ module Recipes
           .select("matching_ingredients")
           .select("matching_ingredients_count")
           .select("non_matching_ingredients_count")
-          .order(
-            "matching_ingredients_count DESC, non_matching_ingredients_count ASC"
+          .select(
+            "CASE WHEN non_matching_ingredients_count = 0 THEN matching_ingredients_count ELSE matching_ingredients_count::float / (matching_ingredients_count + non_matching_ingredients_count) END AS matching_ratio"
           )
+          .order(order_clause)
           .limit(10)
       end
+    end
+
+    def order_clause
+      if use_ratio
+        return "matching_ratio DESC"
+      end
+
+      "matching_ingredients_count DESC, non_matching_ingredients_count ASC"
     end
   end
 end

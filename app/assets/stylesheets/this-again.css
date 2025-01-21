@@ -4,6 +4,19 @@ h2 {
   --pico-typography-spacing-vertical: 0.5rem;
 }
 
+textarea {
+  margin-bottom: 0.5rem;
+}
+
+.ratio-sort-toggle {
+  text-align: right;
+}
+
+.ratio-sort-toggle label {
+  display: inline;
+  width: auto;
+}
+
 .indicator-container {
   position: relative;
   font-size: 0.75rem;
@@ -12,10 +25,21 @@ h2 {
 .indicator-container span {
   opacity: 0;
   position: absolute;
-  top: -3rem;
-  right: 1rem;
+  top: -1.25rem;
 }
 
 #empty-state {
   text-align: center;
+}
+
+#results {
+  margin-top: 1rem;
+}
+
+#results .recipe {
+  margin-bottom: 3rem;
+}
+
+.ingredient-stats {
+  color: #c7cfdd;
 }

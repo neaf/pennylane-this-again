@@ -6,11 +6,12 @@ module Recipes
 
     def results
       @search_sanitizer = SearchSanitizer.new(
-        ingredients: search_params[:ingredients],
+        params: search_params,
       )
 
       searcher = Recipes::Searcher.new(
         ingredients: @search_sanitizer.ingredients_list,
+        use_ratio: @search_sanitizer.use_ratio?
       )
 
       @recipes = searcher.recipes
@@ -19,22 +20,29 @@ module Recipes
     end
 
     def search_params
-      params.permit(:ingredients)
+      params.permit(:ingredients, :use_ratio)
     end
 
     class SearchSanitizer
-      attr_reader :ingredients
+      attr_reader :params
 
-      def initialize(ingredients: nil)
-        @ingredients = ingredients
+      def initialize(params: nil)
+        @params = params
       end
 
       def ingredients_list
-        if ingredients.blank?
+        if params[:ingredients].blank?
           return []
         end
 
-        ingredients.split(/[\n,]/).map(&:strip).reject(&:blank?)
+        params[:ingredients]
+          .split(/[\n,]/)
+          .map(&:strip)
+          .reject(&:blank?)
+      end
+
+      def use_ratio?
+        params[:use_ratio].present?
       end
     end
   end

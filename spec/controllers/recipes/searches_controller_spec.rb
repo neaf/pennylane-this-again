@@ -11,11 +11,6 @@ RSpec.describe Recipes::SearchesController, type: :controller do
 
   describe "#results" do
     context "with valid params" do
-      let(:params) do
-        {
-          ingredients: ingredients,
-        }
-      end
 
       let(:ingredients) do
         <<~TEXT
@@ -41,20 +36,55 @@ RSpec.describe Recipes::SearchesController, type: :controller do
         ]
       end
 
-      it "responds with recipes found using Recipes::Searcher" do
-        expect_method_object_call(
-          object: Recipes::Searcher,
-          init_arguments: {
-            ingredients: ingredients_list,
-          },
-          method: :recipes,
-          return_value: found_recipes,
-        )
+      context "without use_ratio param" do
+        let(:params) do
+          {
+            ingredients: ingredients,
+          }
+        end
 
-        get :results, params: params
+        it "responds with recipes found using Recipes::Searcher" do
+          expect_method_object_call(
+            object: Recipes::Searcher,
+            init_arguments: {
+              ingredients: ingredients_list,
+              use_ratio: false,
+            },
+            method: :recipes,
+            return_value: found_recipes,
+          )
 
-        expect(assigns(:recipes)).to eq(found_recipes)
-        expect(response).to render_template("recipes/searches/results")
+          get :results, params: params
+
+          expect(assigns(:recipes)).to eq(found_recipes)
+          expect(response).to render_template("recipes/searches/results")
+        end
+      end
+
+      context "with use_ratio param" do
+        let(:params) do
+          {
+            ingredients: ingredients,
+            use_ratio: "on",
+          }
+        end
+
+        it "responds with recipes found using Recipes::Searcher" do
+          expect_method_object_call(
+            object: Recipes::Searcher,
+            init_arguments: {
+              ingredients: ingredients_list,
+              use_ratio: true,
+            },
+            method: :recipes,
+            return_value: found_recipes,
+          )
+
+          get :results, params: params
+
+          expect(assigns(:recipes)).to eq(found_recipes)
+          expect(response).to render_template("recipes/searches/results")
+        end
       end
     end
   end

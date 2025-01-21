@@ -4,7 +4,12 @@ RSpec.describe Recipes::Searcher do
   subject(:searcher) do
     described_class.new(
       ingredients: search_ingredients,
+      use_ratio: use_ratio,
     )
+  end
+
+  let(:use_ratio) do
+    false
   end
 
   let!(:recipes) do
@@ -159,6 +164,32 @@ RSpec.describe Recipes::Searcher do
       it "returns recipes with mistyped search ingredients" do
         expect(searcher.recipes).to match_array(recipes.values_at(
           1
+        ))
+      end
+    end
+
+    describe "ratio based ordering" do
+      let(:use_ratio) do
+        true
+      end
+
+      let(:search_ingredients) do
+        [
+          "sugar",
+          "cinnamon",
+          "butter",
+          "honey",
+          "chicken",
+          "cheese",
+          "olive oil",
+          "tomatoes",
+          "vinegar",
+        ]
+      end
+
+      it "promotes recipes with best matching ration over most matching ingredients" do
+        expect(searcher.recipes).to eq(recipes.values_at(
+          3, 1, 2
         ))
       end
     end

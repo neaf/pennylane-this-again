@@ -2,8 +2,13 @@
   <% if @recipes.present? %>
     <ul>
       <% @recipes.each do |recipe| %>
-          <li>
-          <h3><%= recipe.title %></h3>
+          <li class="recipe">
+            <hgroup>
+          <h3>
+            <%= recipe.title %>
+          </h3>
+          <em class="ingredient-stats"><small>Matching: <%= recipe.matching_ingredients_count %> • Non-matching: <%= recipe.non_matching_ingredients_count %> • Total: <%= recipe.matching_ingredients_count + recipe.non_matching_ingredients_count %> • Ratio <%= recipe.matching_ratio.round(1) %></small></em>
+          </hgroup>
           <ul>
               <% recipe.ingredients.each do |ingredient| %>
               <li>
